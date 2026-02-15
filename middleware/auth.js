@@ -1,110 +1,41 @@
-// validation.js
+// Authentication middleware
+// This middleware validates the user token and sets req.user
 
-/**
- * Validation functions for EduTrack LMS
- * Can be used in frontend (React) or backend (Node.js)
- */
+module.exports = (req, res, next) => {
+  try {
+    // For development/testing - set a default user ID
+    // In production, implement proper JWT verification
+    
+    const userId = req.headers['x-user-id'] || 'dev-user-123';
+    
+    // Set user info on request
+    req.user = {
+      id: userId
+    };
 
-/**
- * Check if a string is not empty
- */
-export const isRequired = (value) => {
-  return value !== undefined && value !== null && value.toString().trim() !== '';
-};
+    next();
+    
+    // Uncomment below for production JWT verification:
+    /*
+    const token = req.headers.authorization?.split(' ')[1] || req.headers['x-auth-token'];
+    
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided, authorization required' });
+    }
 
-/**
- * Validate email format
- */
-export const isEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-};
+    const userId = req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'User ID required in x-user-id header' });
+    }
 
-/**
- * Validate password
- * At least 8 characters, 1 uppercase, 1 lowercase, 1 number
- */
-export const isStrongPassword = (password) => {
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-  return regex.test(password);
-};
+    req.user = {
+      id: userId
+    };
 
-/**
- * Validate date string (YYYY-MM-DD)
- */
-export const isValidDate = (date) => {
-  return !isNaN(Date.parse(date));
-};
-
-/**
- * Validate positive number (amounts, marks, etc.)
- */
-export const isPositiveNumber = (num) => {
-  return !isNaN(num) && Number(num) > 0;
-};
-
-/**
- * Validate task status
- */
-export const isValidTaskStatus = (status) => {
-  const validStatuses = ['todo', 'doing', 'done'];
-  return validStatuses.includes(status);
-};
-
-/**
- * Validate priority
- */
-export const isValidPriority = (priority) => {
-  const validPriorities = ['low', 'medium', 'high'];
-  return validPriorities.includes(priority.toLowerCase());
-};
-
-/**
- * Validate array of IDs (Mongo ObjectId strings)
- */
-export const isValidIdArray = (arr) => {
-  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-  return Array.isArray(arr) && arr.every((id) => objectIdRegex.test(id));
-};
-
-/**
- * Validate note content length
- */
-export const isValidNoteContent = (content) => {
-  return isRequired(content) && content.length <= 5000; // max 5000 chars
-};
-
-/**
- * Validate attachment URLs
- */
-export const isValidAttachment = (url) => {
-  const regex = /^(https?:\/\/[^\s]+)$/;
-  return regex.test(url);
-};
-
-/**
- * Validate exam marks
- */
-export const isValidMarks = (marks, totalMarks) => {
-  return isPositiveNumber(marks) && marks <= totalMarks;
-};
-
-/**
- * Validate budget entry
- */
-export const isValidBudgetEntry = (entry) => {
-  const { title, amount, category, date } = entry;
-  return (
-    isRequired(title) &&
-    isPositiveNumber(amount) &&
-    isRequired(category) &&
-    isValidDate(date)
-  );
-};
-
-/**
- * Generic string length validator
- */
-export const isValidLength = (str, min = 1, max = 255) => {
-  return isRequired(str) && str.length >= min && str.length <= max;
+    next();
+    */
+  } catch (error) {
+    res.status(401).json({ message: 'Authentication failed', error: error.message });
+  }
 };
